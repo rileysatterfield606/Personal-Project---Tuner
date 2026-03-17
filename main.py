@@ -14,9 +14,12 @@ try:
 
     while True:
         freqs = freq_queue.get() # Get the frequencies from the analyzer thread
-        note_name, cents_off = frequency_to_note_name(freqs) # Convert frequency to note name and cents off
+        # note_name, cents_off = frequency_to_note_name(freqs) # Convert frequency to note name and cents off
         if freqs is not None:
-            if abs(cents_off) < 10:
+            note_name, cents_off = frequency_to_note_name(freqs) # Convert frequency to note name and cents off
+            if note_name is None:
+                continue
+            if abs(cents_off) < 20:
                 tuned = "IN TUNE"
             elif cents_off > 0:
                 tuned = "SHARP"

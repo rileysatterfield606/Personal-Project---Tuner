@@ -13,7 +13,7 @@ class note_analyzer(Thread):
     # Settings 👅
     SAMPLING_RATE = 44100
     CHUNK_SIZE = 1024
-    THRESHOLD = 300
+    THRESHOLD = 600
     
     
         
@@ -42,8 +42,13 @@ class note_analyzer(Thread):
                 continue
             
             # Now comes the important signal processing stuff- we gotta use FFT
-            fft = np.fft.rfft(data * np.hanning(len(data))) # Creates a window/ smooth curve to fade the edges of audio chunk to zero, also lowk runs FAST FOURIER TRANSFORM which breaks audio chunks aaprt into frequencies
+            fft = np.abs(np.fft.rfft(data * np.hanning(len(data)))) # Creates a window/ smooth curve to fade the edges of audio chunk to zero, also lowk runs FAST FOURIER TRANSFORM which breaks audio chunks aaprt into frequencies
             freqs = np.fft.rfftfreq(len(data), 1/ self.SAMPLING_RATE) # List of magnitudes that generates matching list of freqs into hz
-            dominant_freq = freqs[np.argmax(np.abs(fft))] # Find the index of the max magnitude in the FFT and get the corresponding frequency from the freqs list
+            hps = fft.copy()
+            for h in range(2, 6):
+                downsampled = fft[::h]
+                hps[:len(downsampled)] *= downsampled # Find the index of the max magnitude in the FFT and get the corresponding frequency from the freqs list
+            
+            dominant_freq = freqs[np.argmax(hps)] # Find the index of the max magnitude in the HPS and get the corresponding frequency from the freqs list
             self.queue.put(dominant_freq) # Put our frequency into the queue 
     
